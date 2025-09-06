@@ -8,60 +8,61 @@ import com.jpmc.midascore.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DatabaseConduit {
-    private final UserRepository userRepository;
-    private final TransactionRecordRepository transactionRecordRepository;
+public class DatabaseGateway {
 
-    public DatabaseConduit(UserRepository userRepository, TransactionRecordRepository transactionRecordRepository) {
-        this.userRepository = userRepository;
-        this.transactionRecordRepository = transactionRecordRepository;
+    private final UserRepository userRepo;
+    private final TransactionRecordRepository txnRecordRepo;
+
+    public DatabaseGateway(UserRepository userRepo, TransactionRecordRepository txnRecordRepo) {
+        this.userRepo = userRepo;
+        this.txnRecordRepo = txnRecordRepo;
     }
 
-    public void save(UserRecord userRecord) {
-        userRepository.save(userRecord);
+    public void saveUser(UserRecord user) {
+        userRepo.save(user);
     }
 
-    public void save(Transaction transaction) {
-        // assumes isValid has already been called on transaction
+    public void saveTransaction(Transaction txn) {
+        // assumes validation already performed
+        UserRecord sender = findUser(txn.getSenderId());
+        UserRecord recipient = findUser(txn.getRecipientId());
 
-        // record transaction
-        UserRecord sender = queryUser(transaction.getSenderId());
-        UserRecord recipient = queryUser(transaction.getRecipientId());
-        TransactionRecord transactionRecord = new TransactionRecord(sender, recipient, transaction.getAmount(), transaction.getIncentive());
-        transactionRecordRepository.save(transactionRecord);
+        TransactionRecord record = new TransactionRecord(
+                sender,
+                recipient,
+                txn.getAmount(),
+                txn.getIncentive()
+        );
+        txnRecordRepo.save(record);
 
-        // update user balances
-        sender.setBalance(sender.getBalance() - transaction.getAmount());
-        save(sender);
-        recipient.setBalance(recipient.getBalance() + transaction.getAmount() + transaction.getIncentive());
-        save(recipient);
+        // update balances
+        sender.setBalance(sender.getBalance() - txn.getAmount());
+        saveUser(sender);
+
+        recipient.setBalance(recipient.getBalance() + txn.getAmount() + txn.getIncentive());
+        saveUser(recipient);
     }
 
-    public boolean isValid(Transaction transaction) {
-        UserRecord sender = queryUser(transaction.getSenderId());
+    public boolean validate(Transaction txn) {
+        UserRecord sender = findUser(txn.getSenderId());
         if (sender == null) {
             return false;
         }
-        UserRecord recipient = queryUser(transaction.getRecipientId());
+
+        UserRecord recipient = findUser(txn.getRecipientId());
         if (recipient == null) {
             return false;
         }
-        if (sender.getBalance() < transaction.getAmount()) {
-            return false;
-        }
-        return true;
+
+        return sender.getBalance() >= txn.getAmount();
     }
 
-    public UserRecord queryUser(Long userId) {
-        return userRepository.findById(userId).orElse(null);
+    public UserRecord findUser(Long id) {
+        return userRepo.findById(id).orElse(null);
     }
 
-    public float queryUserBalance(Long userId) {
-        UserRecord userRecord = queryUser(userId);
-        if (userRecord == null) {
-            return 0;
-        } else {
-            return userRecord.getBalance();
-        }
+    public float findUserBalance(Long id) {
+        UserRecord user = findUser(id);
+        return (user == null) ? 0 : user.getBalance();
     }
 }
