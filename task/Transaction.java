@@ -3,57 +3,62 @@ package com.jpmc.midascore.foundation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Transaction {
-    private long senderId;
-    private long recipientId;
-    private float amount;
-    private float incentive;
+public class Transfer {
 
-    public Transaction() {
+    private long fromUserId;
+    private long toUserId;
+    private float value;
+    private float bonus;
+
+    public Transfer() {
+        // default constructor
     }
 
-    public Transaction(long senderId, long recipientId, float amount) {
-        this.senderId = senderId;
-        this.recipientId = recipientId;
-        this.amount = amount;
-        this.incentive = 0;
+    public Transfer(long fromUserId, long toUserId, float value) {
+        this.fromUserId = fromUserId;
+        this.toUserId = toUserId;
+        this.value = value;
+        this.bonus = 0f;
     }
 
-    public long getSenderId() {
-        return senderId;
+    public long getFromUserId() {
+        return fromUserId;
     }
 
-    public void setSenderId(long senderId) {
-        this.senderId = senderId;
+    public void setFromUserId(long fromUserId) {
+        this.fromUserId = fromUserId;
     }
 
-    public long getRecipientId() {
-        return recipientId;
+    public long getToUserId() {
+        return toUserId;
     }
 
-    public void setRecipientId(long recipientId) {
-        this.recipientId = recipientId;
+    public void setToUserId(long toUserId) {
+        this.toUserId = toUserId;
     }
 
-    public float getAmount() {
-        return amount;
+    public float getValue() {
+        return value;
     }
 
-    public void setAmount(float amount) {
-        this.amount = amount;
+    public void setValue(float value) {
+        this.value = value;
     }
 
-    public float getIncentive() {
-        return incentive;
+    public float getBonus() {
+        return bonus;
     }
 
-    public void setIncentive(float incentive) {
-        this.incentive = incentive;
+    public void setBonus(float bonus) {
+        this.bonus = bonus;
     }
 
     @Override
     public String toString() {
-        return "Transaction {senderId=" + senderId + ", recipientId=" + recipientId + ", amount=" + amount +
-                ", incentive=" + incentive + "}";
+        return "Transfer {fromUserId=" + fromUserId +
+                ", toUserId=" + toUserId +
+                ", value=" + value +
+                ", bonus=" + bonus + "}";
     }
 }
+
