@@ -6,16 +6,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BalanceRestController {
-    private final DatabaseConduit databaseConduit;
+public class BalanceController {
 
-    public BalanceRestController(DatabaseConduit databaseConduit) {
-        this.databaseConduit = databaseConduit;
+    private final DatabaseConduit dbConduit;
+
+    public BalanceController(DatabaseConduit dbConduit) {
+        this.dbConduit = dbConduit;
     }
 
-    @GetMapping(value = "/balance")
-    public Balance queryBalance(@RequestParam("userId") Long userId) {
-        float balance = databaseConduit.queryUserBalance(userId);
-        return new Balance(balance);
+    @GetMapping("/balance")
+    public Balance getBalance(@RequestParam("userId") Long id) {
+        float userBalance = dbConduit.queryUserBalance(id);
+        return new Balance(userBalance);
     }
 }
