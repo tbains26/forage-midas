@@ -3,26 +3,28 @@ package com.jpmc.midascore.foundation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Balance {
-    private float amount;
+public class AccountBalance {
 
-    public Balance() {
+    private float value;
+
+    public AccountBalance() {
+        // default constructor
     }
 
-    public Balance(float amount) {
-        this.amount = amount;
+    public AccountBalance(float value) {
+        this.value = value;
     }
 
-    public float getAmount() {
-        return amount;
+    public float getValue() {
+        return value;
     }
 
-    public void setAmount(float amount) {
-        this.amount = amount;
+    public void setValue(float value) {
+        this.value = value;
     }
 
     @Override
     public String toString() {
-        return "Balance {amount=" + amount + "}";
+        return "AccountBalance {value=" + value + "}";
     }
 }
