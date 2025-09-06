@@ -8,21 +8,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionHandler {
-    static final Logger logger = LoggerFactory.getLogger(TransactionHandler.class);
-    private final DatabaseConduit databaseConduit;
-    private final IncentiveQuerier incentiveQuerier;
+public class TransactionProcessor {
 
-    public TransactionHandler(DatabaseConduit databaseConduit, IncentiveQuerier incentiveQuerier) {
-        this.databaseConduit = databaseConduit;
-        this.incentiveQuerier = incentiveQuerier;
+    private static final Logger log = LoggerFactory.getLogger(TransactionProcessor.class);
+
+    private final DatabaseConduit dbConduit;
+    private final IncentiveQuerier incentiveService;
+
+    public TransactionProcessor(DatabaseConduit dbConduit, IncentiveQuerier incentiveService) {
+        this.dbConduit = dbConduit;
+        this.incentiveService = incentiveService;
     }
 
-    public void handleTransaction(Transaction transaction) {
-        if (databaseConduit.isValid(transaction)) {
-            Incentive incentive = incentiveQuerier.query(transaction);
-            transaction.setIncentive(incentive.getAmount());
-            databaseConduit.save(transaction);
+    public void process(Transaction txn) {
+        if (!dbConduit.isValid(txn)) {
+            return;
         }
+
+        Incentive incentive = incentiveService.query(txn);
+        txn.setIncentive(incentive.getAmount());
+
+        dbConduit.save(txn);
+        log.debug("Transaction processed and saved: {}", txn);
     }
 }
+
